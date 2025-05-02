@@ -21,6 +21,7 @@ class PicknicApp:
         self.current_user = None
         self.user_data = {}
         self.stamps = []
+        self.all_stamps = []
         self.memories = []
         self.load_sample_stamps()
 
@@ -1070,10 +1071,10 @@ class PicknicApp:
     def search_filter_stamps(self, query):
         query = query.lower().strip()
         if not query:
-            filtered = self.stamps  # Show all if query is empty
+            filtered = list(self.all_stamps)  # Show all if query is empty
         else:
             filtered = []
-            for stamp in self.stamps:
+            for stamp in self.all_stamps:
                 text = " ".join([
                     stamp.get("title", ""),
                     stamp.get("location", ""),
@@ -1212,7 +1213,7 @@ class PicknicApp:
 
     def load_sample_stamps(self):
         """Load sample stamp data"""
-        self.stamps = [
+        self.all_stamps = [
             {
                 "id": "ST-001",
                 "title": "Sunset Beach Picnic",
@@ -1334,6 +1335,7 @@ class PicknicApp:
                 "image_path": "../picknic/assets/images/nightMarket.jpg"
             }
         ]
+        self.stamps = list(self.all_stamps)
 
 
 if __name__ == "__main__":
