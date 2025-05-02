@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from core.user_manager import load_user, save_user, user_exists
 from ui.home_screen import HomeScreen
+from ui.widgets import create_navbar
 
 class LoginScreen:
     def __init__(self, state):

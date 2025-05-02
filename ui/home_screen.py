@@ -3,6 +3,7 @@ import tkinter as tk
 from ui.hangout_screen import HangoutScreen
 from ui.memory_screen import MemoryScreen
 from ui.profile_screen import ProfileScreen
+from ui.widgets import create_navbar
 
 class HomeScreen:
     def __init__(self, state):
@@ -11,6 +12,7 @@ class HomeScreen:
 
     def show(self):
         self.clear()
+        create_navbar(self.state, self.root)
         bg = self.state.colors["background"]
         text = self.state.colors["text"]
         accent = self.state.colors["accent"]

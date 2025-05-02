@@ -2,6 +2,7 @@
 import tkinter as tk
 from random import sample
 from ui.memory_screen import MemoryScreen
+from ui.widgets import create_navbar
 
 class HangoutScreen:
     def __init__(self, state):
@@ -19,6 +20,7 @@ class HangoutScreen:
     def show(self):
         self.clear()
         self.show_question()
+        create_navbar(self.state, self.root)
 
     def clear(self):
         for widget in self.root.winfo_children():

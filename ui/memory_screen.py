@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from core.user_manager import save_user
+from ui.widgets import create_navbar
 
 class MemoryScreen:
     def __init__(self, state):
@@ -11,6 +12,8 @@ class MemoryScreen:
 
     def show(self):
         self.clear()
+        create_navbar(self.state, self.root)
+
         bg = self.state.colors["background"]
         text = self.state.colors["text"]
 
