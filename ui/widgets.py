@@ -1,1 +1,1 @@
-# reusable UI widgets
+# placeholder for reusable UI widgets (like tamp cards or memory previews)
