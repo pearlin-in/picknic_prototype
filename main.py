@@ -1235,7 +1235,7 @@ class PicknicApp:
                 "category": "Creative",
                 "tags": ["indoor", "friends", "daytime"],
                 "url": "https://g.co/kgs/qD3MNXi",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/artHouseCafe.jpg"
             },
             {
                 "id": "ST-003",
@@ -1247,7 +1247,7 @@ class PicknicApp:
                 "category": "Adventure",
                 "tags": ["outdoor", "group", "evening"],
                 "url": "https://g.co/kgs/S13Swcy",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/desertStar.jpg"
             },
             {
                 "id": "ST-004",
@@ -1259,7 +1259,7 @@ class PicknicApp:
                 "category": "Fun",
                 "tags": ["indoor", "friends", "anytime"],
                 "url": "https://g.co/kgs/Ky4vJE3",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/vintageArcade.jpg"
             },
             {
                 "id": "ST-005",
@@ -1271,7 +1271,7 @@ class PicknicApp:
                 "category": "Quiet",
                 "tags": ["indoor", "solo", "daytime"],
                 "url": "https://g.co/kgs/1LPHzeV",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/bookstoreCafe.jpg"
             },
             {
                 "id": "ST-006",
@@ -1283,7 +1283,7 @@ class PicknicApp:
                 "category": "Active",
                 "tags": ["outdoor", "group", "daytime"],
                 "url": "https://g.co/kgs/8pGmG8i",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/mangrove.jpg"
             },
             {
                 "id": "ST-007",
@@ -1295,7 +1295,7 @@ class PicknicApp:
                 "category": "Luxury",
                 "tags": ["outdoor", "couples", "evening"],
                 "url": "https://g.co/kgs/j6UD71p",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/rooftop.jpg"
             },
             {
                 "id": "ST-008",
@@ -1307,7 +1307,7 @@ class PicknicApp:
                 "category": "Creative",
                 "tags": ["indoor", "friends", "daytime"],
                 "url": "https://g.co/kgs/kVXCuQY",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/pottery.jpg"
             },
             {
                 "id": "ST-009",
@@ -1319,7 +1319,7 @@ class PicknicApp:
                 "category": "Chill",
                 "tags": ["outdoor", "any", "daytime"],
                 "url": "https://g.co/kgs/swwiqSv",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/gardenCafe.jpg"
             },
             {
                 "id": "ST-010",
@@ -1331,6 +1331,7 @@ class PicknicApp:
                 "category": "Cultural",
                 "tags": ["outdoor", "group", "evening"],
                 "url": "https://g.co/kgs/WAc5w3S",
+                "image_path": "../picknic/assets/images/nightMarket.jpg"
             }
         ]
 
