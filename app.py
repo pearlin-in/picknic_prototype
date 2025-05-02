@@ -5,7 +5,7 @@ from ui.login_screen import LoginScreen
 def main():
     root = tk.Tk()
     state = AppState(root)
-    LoginScreen(state).show()
+    state.show_screen(LoginScreen)
     root.mainloop()
 
 if __name__ == "__main__":

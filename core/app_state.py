@@ -20,3 +20,8 @@ class AppState:
         }
         self.stamps = []
         self.current_stamp = None
+
+    def show_screen(self, ScreenClass):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        ScreenClass(self).show()

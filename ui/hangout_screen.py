@@ -1,0 +1,1 @@
+# for vibe quiz & spot suggestions
