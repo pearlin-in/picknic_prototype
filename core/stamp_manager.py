@@ -1,0 +1,1 @@
+# Stamp loading, filtering, and selection
