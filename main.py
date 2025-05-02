@@ -8,8 +8,6 @@ from datetime import datetime
 import webbrowser
 from io import BytesIO
 import requests
-import webbrowser
-
 
 class PicknicApp:
     def __init__(self, root):
