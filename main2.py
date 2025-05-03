@@ -248,7 +248,7 @@ class PicknicApp:
             text=username[0].upper(),
             font=("Courier", 24, "bold"),
             bg=self.colors["primary"],
-            fg="white",
+            fg=self.colours["text"],
             width=4,
             height=2
         )
@@ -1600,7 +1600,7 @@ class PicknicApp:
                     text="Accept",
                     font=("Courier", 8),
                     bg=self.colors["accent"],
-                    fg="white",
+                    fg=self.colors["text"],
                     command=lambda r=req: self.handle_friend_request(r, True)
                 ).pack(side=tk.LEFT, padx=5)
 
@@ -1609,7 +1609,7 @@ class PicknicApp:
                     text="Reject",
                     font=("Courier", 8),
                     bg=self.colors["secondary"],
-                    fg="white",
+                    fg=self.colors["text"],
                     command=lambda r=req: self.handle_friend_request(r, False)
                 ).pack(side=tk.LEFT)
                 # Logout button
