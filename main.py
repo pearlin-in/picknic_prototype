@@ -8,8 +8,6 @@ from datetime import datetime
 import webbrowser
 from io import BytesIO
 import requests
-import webbrowser
-
 
 class PicknicApp:
     def __init__(self, root):
@@ -26,6 +24,7 @@ class PicknicApp:
         self.load_sample_stamps()
         
         # UI colors
+        '''
         self.colors = {
             "primary": "#FF9AA2",  # Pink
             "secondary": "#FFB7B2",  # Light pink
@@ -35,6 +34,16 @@ class PicknicApp:
             "highlight": "#E2F0CB",  # Mint
             "stamp_border": "#5A3921"  # Dark brown for stamp edges
         }
+        '''
+        self.colors = {
+        "primary": "#3A6EA5",
+        "secondary": "#739FD6",
+        "accent": "#F5EBDD",
+        "background": "#FFF5EB",
+        "text": "#2E2E2E",
+        "highlight": "#D1E8E2",
+        "stamp_border": "#2E2E2E"
+        } # Changed the colours a bit so it's more readable
         
         # Create navigation frame
         self.nav_frame = tk.Frame(root, bg=self.colors["primary"], height=60)
