@@ -9,6 +9,8 @@ import webbrowser
 from io import BytesIO
 import requests
 
+
+
 class PicknicApp:
     def __init__(self, root):
         self.root = root
@@ -24,7 +26,6 @@ class PicknicApp:
         self.load_sample_stamps()
         
         # UI colors
-        '''
         self.colors = {
             "primary": "#FF9AA2",  # Pink
             "secondary": "#FFB7B2",  # Light pink
@@ -34,16 +35,6 @@ class PicknicApp:
             "highlight": "#E2F0CB",  # Mint
             "stamp_border": "#5A3921"  # Dark brown for stamp edges
         }
-        '''
-        self.colors = {
-        "primary": "#3A6EA5",
-        "secondary": "#739FD6",
-        "accent": "#F5EBDD",
-        "background": "#FFF5EB",
-        "text": "#2E2E2E",
-        "highlight": "#D1E8E2",
-        "stamp_border": "#2E2E2E"
-        } # Changed the colours a bit so it's more readable
         
         # Create navigation frame
         self.nav_frame = tk.Frame(root, bg=self.colors["primary"], height=60)
@@ -54,6 +45,7 @@ class PicknicApp:
         nav_items = [
             ("🏠 Home", self.show_home),
             ("🎯 Hangout", self.show_hangout),
+            ("🌍 Explore", self.show_explore),
             ("✉️ Mail", self.show_mail),
             ("👤 Me", self.show_profile)
         ]
@@ -79,7 +71,564 @@ class PicknicApp:
         
         # Start with login screen
         self.show_login()
+
+    def show_explore(self):
+        """Show all registered users"""
+        if not self.current_user:
+            self.show_login()
+            return
+        
+        self.clear_main_frame()
+        self.main_frame.explore_container = tk.Frame(self.main_frame, bg=self.colors["background"])
+        self.main_frame.explore_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Title
+        tk.Label(
+            self.main_frame,
+            text="🌍 Explore Users",
+            font=("Courier", 20, "bold"),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=20)
+        
+        # Container for user cards
+        container = tk.Frame(self.main_frame, bg=self.colors["background"])
+        container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Create scrollable canvas
+        canvas = tk.Canvas(container, bg=self.colors["background"], highlightthickness=0)
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg=self.colors["background"])
+        
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        
+        # Get all user files
+        user_files = [f for f in os.listdir() if f.startswith("user_") and f.endswith(".json")]
+        
+        if not user_files:
+            tk.Label(
+                scrollable_frame,
+                text="No other users found yet!",
+                font=("Courier", 14),
+                bg=self.colors["background"],
+                fg=self.colors["text"]
+            ).pack(pady=50)
+            return
+        
+        # Load and display users
+        row, col = 0, 0
+        for user_file in user_files:
+            try:
+                with open(user_file, "r") as f:
+                    user_data = json.load(f)
+                    
+                # Skip current user
+                if user_data["username"] == self.current_user:
+                    continue
+                    
+                # Create user card
+                user_card = tk.Frame(
+                    scrollable_frame,
+                    bg="white",
+                    padx=20,
+                    pady=20,
+                    relief="ridge",
+                    bd=2
+                )
+                user_card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
+                
+                # Profile picture
+                profile_pic_path = user_data.get("profile_pic", "")
+                if profile_pic_path and os.path.exists(profile_pic_path):
+                    try:
+                        img = Image.open(profile_pic_path)
+                        img.thumbnail((100, 100))
+                        photo = ImageTk.PhotoImage(img)
+                        pic_label = tk.Label(user_card, image=photo, bg="white")
+                        pic_label.image = photo
+                        pic_label.pack()
+                    except:
+                        self.create_default_profile_display(user_card, user_data["username"])
+                else:
+                    self.create_default_profile_display(user_card, user_data["username"])
+                
+                # Username
+                tk.Label(
+                    user_card,
+                    text=user_data["username"],
+                    font=("Courier", 12, "bold"),
+                    bg="white"
+                ).pack(pady=5)
+                
+                # Stats
+                stats_frame = tk.Frame(user_card, bg="white")
+                stats_frame.pack()
+                
+                tk.Label(
+                    stats_frame,
+                    text=f"Memories: {len(user_data.get('memories', []))}",
+                    font=("Courier", 10),
+                    bg="white"
+                ).pack(side=tk.LEFT, padx=5)
+                
+                tk.Label(
+                    stats_frame,
+                    text=f"Stamps: {len(set(m['stamp_id'] for m in user_data.get('memories', [])))}",
+                    font=("Courier", 10),
+                    bg="white"
+                ).pack(side=tk.LEFT, padx=5)
+
+                btn_frame = tk.Frame(user_card, bg="white")
+                btn_frame.pack(pady=5)
+
+                request_btn = tk.Button(
+                    btn_frame,
+                    text="Send Friend Request",
+                    font=("Courier", 10),
+                    bg=self.colors["accent"],
+                    fg="white",
+                   command=lambda u=user_data["username"]: self.send_friend_request(u))
+                request_btn.pack()
+
+                # Immediately check and update button state
+                self.update_friend_request_button(request_btn, user_data["username"])
+                 # Update grid position
+                col += 1
+                if col > 2:
+                    col = 0
+                    row += 1
+                    
+            except Exception as e:
+                print(f"Error loading {user_file}: {e}")
+
+    def check_request_status(self, button, target_username):
+        """Check and update button state initially"""
+        try:
+            with open(f"user_{target_username}.json", "r") as f:
+                target_data = json.load(f)
+            
+            if self.current_user in target_data.get("friend_requests", []):
+                button.config(text="✓ Request Sent", state=tk.DISABLED)
+            else:
+                button.config(text="Send Friend Request", state=tk.NORMAL)
+        except Exception as e:
+            button.config(state=tk.DISABLED)
+            print(f"Error checking request status: {str(e)}")
+
+    def create_default_profile_display(self, parent, username):
+        """Create default profile display for explore page"""
+        label = tk.Label(
+            parent,
+            text=username[0].upper(),
+            font=("Courier", 24, "bold"),
+            bg=self.colors["primary"],
+            fg="white",
+            width=4,
+            height=2
+        )
+        label.pack()
+        return label
     
+    def send_friend_request(self, target_username):
+        print(f"Sending request from {self.current_user} to {target_username}")
+        if target_username == self.current_user:
+            return
+        
+        try:
+            # Load target user's data
+            with open(f"user_{target_username}.json", "r") as f:
+                target_data = json.load(f)
+            
+            # Check if request already exists
+            if self.current_user not in target_data.get("friend_requests", []):
+                target_data.setdefault("friend_requests", []).append(self.current_user)
+                
+                # Save updated data
+                with open(f"user_{target_username}.json", "w") as f:
+                    json.dump(target_data, f, indent=4)
+                
+                messagebox.showinfo("Success", f"Friend request sent to {target_username}!")
+                # Refresh explore page to update buttons
+                self.show_explore()
+            else:
+                messagebox.showinfo("Info", "Request already sent!")
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not send request: {str(e)}")
+
+    def update_friend_request_button(self, button, target_username):
+        """Update button state based on existing requests"""
+        # Load target user's current data
+        try:
+            with open(f"user_{target_username}.json", "r") as f:
+                target_data = json.load(f)
+            
+            requests = target_data.get("friend_requests", [])
+            if self.current_user in requests:
+                button.config(text="✓ Request Sent", state=tk.DISABLED)
+            else:
+                button.config(text="Send Friend Request", state=tk.NORMAL)
+        except Exception as e:
+            button.config(state=tk.DISABLED)
+            print(f"Error updating button: {str(e)}")
+    
+    def handle_friend_request(self, sender_username, accept):
+        """Handle friend request response"""
+        try:
+            # Update current user's data
+            with open(f"user_{self.current_user}.json", "r") as f:
+                current_data = json.load(f)
+            
+            if sender_username in current_data["friend_requests"]:
+                current_data["friend_requests"].remove(sender_username)
+                
+                if accept:
+                    current_data["friends"].append(sender_username)
+                    # Also add current user to sender's friends
+                    with open(f"user_{sender_username}.json", "r") as f:
+                        sender_data = json.load(f)
+                    sender_data["friends"].append(self.current_user)
+                    with open(f"user_{sender_username}.json", "w") as f:
+                        json.dump(sender_data, f)
+                
+                with open(f"user_{self.current_user}.json", "w") as f:
+                    json.dump(current_data, f)
+                
+                messagebox.showinfo("Success", 
+                    f"Accepted {sender_username}'s request!" if accept 
+                    else f"Rejected {sender_username}'s request.")
+                
+                self.show_profile()
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not process request: {str(e)}")
+
+    def start_joint_quiz(self):
+        """Start joint hangout planning with a friend"""
+        if not self.current_user or not self.user_data.get("friends"):
+            messagebox.showinfo("Info", "You need friends to plan a joint hangout!")
+            return
+        
+        self.clear_main_frame()
+        
+        # Select friend
+        tk.Label(
+            self.main_frame,
+            text="👫 Plan Joint Hangout",
+            font=("Courier", 20, "bold"),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=20)
+        
+        tk.Label(
+            self.main_frame,
+            text="Choose a friend to plan with:",
+            font=("Courier", 12),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=10)
+        
+        friends_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
+        friends_frame.pack()
+        
+        for friend in self.user_data.get("friends", []):
+            btn = tk.Button(
+                friends_frame,
+                text=f"Plan with {friend}",
+                font=("Courier", 12),
+                bg=self.colors["accent"],
+                fg="white",
+                padx=20,
+                pady=10,
+                command=lambda f=friend: self.start_joint_quiz_with_friend(f)
+            )
+            btn.pack(pady=5, fill=tk.X)
+
+    def start_joint_quiz_with_friend(self, friend):
+        """Start quiz with selected friend"""
+        self.joint_plan = {
+            "friend": friend,
+            "your_answers": {},
+            "friend_answers": {},
+            "current_user": "you"
+        }
+        
+        # Load friend's data to get their preferences
+        try:
+            with open(f"user_{friend}.json", "r") as f:
+                self.friend_data = json.load(f)
+        except:
+            messagebox.showerror("Error", "Could not load friend's data")
+            return
+        
+        self.show_joint_question()
+
+    def show_joint_question(self):
+        """Show joint planning questions"""
+        self.clear_main_frame()
+        
+        # Shared questions for both users
+        self.joint_questions = [
+            {
+                "question": "Preferred vibe for the hangout?",
+                "options": [
+                    "🎭 Cultural Experience",
+                    "🍔 Food Adventure",
+                    "🌳 Outdoor Activities",
+                    "🎮 Casual Hangout"
+                ]
+            },
+            {
+                "question": "How much time do you want to spend?",
+                "options": [
+                    "⏳ 1-2 hours",
+                    "⌛ 3-4 hours",
+                    "🕒 Whole day"
+                ]
+            },
+            {
+                "question": "Budget preference?",
+                "options": [
+                    "💰 Budget (under AED 100)",
+                    "💵 Moderate (AED 100-300)",
+                    "💸 Splurge (AED 300+)"
+                ]
+            }
+        ]
+        
+        if not hasattr(self, 'current_joint_q'):
+            self.current_joint_q = 0
+        
+        if self.current_joint_q >= len(self.joint_questions):
+            self.show_joint_results()
+            return
+        
+        # Show whose turn it is
+        user = "Your" if self.joint_plan["current_user"] == "you" else f"{self.joint_plan['friend']}'s"
+        tk.Label(
+            self.main_frame,
+            text=f"{user} Preferences:",
+            font=("Courier", 16, "bold"),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=20)
+        
+        question = self.joint_questions[self.current_joint_q]
+        
+        tk.Label(
+            self.main_frame,
+            text=question["question"],
+            font=("Courier", 14),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=10)
+        
+        options_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
+        options_frame.pack()
+        
+        for option in question["options"]:
+            btn = tk.Button(
+                options_frame,
+                text=option,
+                font=("Courier", 12),
+                bg=self.colors["secondary"],
+                fg=self.colors["text"],
+                padx=20,
+                pady=10,
+                width=25,
+                command=lambda opt=option: self.record_joint_answer(opt)
+            )
+            btn.pack(pady=5)
+
+    def record_joint_answer(self, answer):
+        """Store answer and progress through questions"""
+        current_user = self.joint_plan["current_user"]
+        question = self.joint_questions[self.current_joint_q]["question"]
+        
+        if current_user == "you":
+            self.joint_plan["your_answers"][question] = answer
+        else:
+            self.joint_plan["friend_answers"][question] = answer
+        
+        # Move to next question or switch users
+        if self.current_joint_q < len(self.joint_questions) - 1:
+            self.current_joint_q += 1
+        else:
+            if current_user == "you":
+                # Switch to friend's turn
+                self.current_joint_q = 0
+                self.joint_plan["current_user"] = "friend"
+            else:
+                # Both users have answered
+                self.current_joint_q = 0
+                self.show_joint_results()
+                return
+        
+        self.show_joint_question()
+
+    def show_joint_results(self):
+        """Show combined recommendations"""
+        self.clear_main_frame()
+        
+        # Combine preferences
+        combined_answers = {
+            "vibe": [
+                self.joint_plan["your_answers"].get("Preferred vibe for the hangout?"),
+                self.joint_plan["friend_answers"].get("Preferred vibe for the hangout?")
+            ],
+            "time": max(
+                self.joint_plan["your_answers"].get("How much time do you want to spend?"),
+                self.joint_plan["friend_answers"].get("How much time do you want to spend?")
+            ),
+            "budget": max(
+                self.joint_plan["your_answers"].get("Budget preference?"),
+                self.joint_plan["friend_answers"].get("Budget preference?")
+            )
+        }
+        
+        # Filter stamps based on combined preferences
+        recommendations = []
+        for stamp in self.stamps:
+            match = 0
+            # Vibe matching
+            if any(vibe in stamp["category"] for vibe in combined_answers["vibe"]):
+                match += 1
+            # Time matching
+            if stamp["duration"] == combined_answers["time"]:
+                match += 1
+            # Budget matching
+            if stamp["budget"] == combined_answers["budget"]:
+                match += 1
+            if match >= 2:
+                recommendations.append(stamp)
+        
+        # Display results
+        tk.Label(
+            self.main_frame,
+            text="Perfect Joint Hangout Spots",
+            font=("Courier", 20, "bold"),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=20)
+        
+        if not recommendations:
+            tk.Label(
+                self.main_frame,
+                text="No perfect matches found, but these might work:",
+                font=("Courier", 12),
+                bg=self.colors["background"],
+                fg=self.colors["text"]
+            ).pack()
+            recommendations = random.sample(self.stamps, min(3, len(self.stamps)))
+        
+        rec_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
+        rec_frame.pack(pady=20, fill=tk.BOTH, expand=True)
+        
+        canvas = tk.Canvas(rec_frame, bg=self.colors["background"], highlightthickness=0)
+        scrollbar = ttk.Scrollbar(rec_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg=self.colors["background"])
+        
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        
+        for stamp in recommendations:
+            frame = self.create_joint_stamp_card(scrollable_frame, stamp)
+            frame.pack(fill=tk.X, pady=10, padx=20)
+
+    def create_joint_stamp_card(self, parent, stamp):
+        """Create special joint hangout card"""
+        frame = tk.Frame(
+            parent,
+            bg="white",
+            padx=20,
+            pady=20,
+            highlightbackground=self.colors["primary"],
+            highlightthickness=2
+        )
+        
+        # Title with hearts
+        title_frame = tk.Frame(frame, bg="white")
+        title_frame.pack(fill=tk.X)
+        tk.Label(
+            title_frame,
+            text="❤️ " + stamp["title"] + " ❤️",
+            font=("Courier", 14, "bold"),
+            bg="white"
+        ).pack(side=tk.LEFT)
+        
+        # Compatibility info
+        comp_frame = tk.Frame(frame, bg="white")
+        comp_frame.pack(fill=tk.X, pady=5)
+        
+        tk.Label(
+            comp_frame,
+            text=f"👥 Good for duos | ⏱ {stamp['duration']} | 💰 {stamp['budget']}",
+            font=("Courier", 10),
+            bg="white"
+        ).pack(side=tk.LEFT)
+        
+        # Buttons
+        btn_frame = tk.Frame(frame, bg="white")
+        btn_frame.pack(fill=tk.X, pady=10)
+        
+        tk.Button(
+            btn_frame,
+            text="Choose Together",
+            font=("Courier", 10),
+            bg=self.colors["accent"],
+            fg="white",
+            command=lambda s=stamp: self.save_joint_plan(s)
+        ).pack(side=tk.LEFT, padx=5)
+        
+        return frame
+
+    def save_joint_plan(self, stamp):
+        """Save the joint plan for both users"""
+        plan_details = {
+        "type": "joint",
+        "friend": self.joint_plan["friend"],
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "stamp_id": stamp["id"],
+        "stamp_title": stamp["title"],
+        "notes": f"Joint plan with {self.joint_plan['friend']}",
+        "status": "pending",
+        "scrapbook": [],
+        # Add empty image_path for compatibility
+        "image_path": ""  
+    }
+        
+         # Save to current user
+        if isinstance(self.memories, list):
+            self.memories.append(plan_details)
+        else:
+            self.memories = [plan_details]
+        self.save_user_data()
+            
+        # Save to friend's data
+        try:
+            with open(f"user_{self.joint_plan['friend']}.json", "r") as f:
+                friend_data = json.load(f)
+            # Ensure friend's memories is a list
+            if not isinstance(friend_data.get("memories", []), list):
+                friend_data["memories"] = []
+            friend_data["memories"].append(plan_details)
+            with open(f"user_{self.joint_plan['friend']}.json", "w") as f:
+                json.dump(friend_data, f, indent=4)
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not save friend's plan: {str(e)}")
+        
+        messagebox.showinfo("Success", 
+            f"Joint plan saved! {self.joint_plan['friend']} has been notified!")
+        self.show_home()
+                    
     def clear_main_frame(self):
         """Clear the main content area"""
         for widget in self.main_frame.winfo_children():
@@ -181,7 +730,21 @@ class PicknicApp:
             command=self.handle_register
         )
         register_btn.pack(side=tk.LEFT, padx=10)
-    
+     
+    def create_default_profile_display(self, parent, username):
+        """Create default profile display for explore page"""
+        label = tk.Label(
+            parent,
+            text=username[0].upper(),
+            font=("Courier", 24, "bold"),
+            bg=self.colors["primary"],
+            fg="white",
+            width=4,
+            height=2
+        )
+        label.pack()
+        return label
+
     def handle_login(self):
         """Handle user login"""
         username = self.username_entry.get()
@@ -192,20 +755,31 @@ class PicknicApp:
             return
         
         # Check if user exists
-        if os.path.exists(f"users/user_{username}.json"):
-            with open(f"users/user_{username}.json", "r") as f:
-                self.user_data = json.load(f)
-            
-            # In a real app, verify password hash
-            if password == self.user_data["password"]:
-                self.current_user = username
-                self.memories = self.user_data.get("memories", [])
-                self.show_home()
-            else:
-                messagebox.showerror("Error", "Incorrect password")
+        if os.path.exists(f"user_{username}.json"):
+                with open(f"user_{username}.json", "r") as f:
+                    self.user_data = json.load(f)
+                
+                # Ensure memories is a list and repair if needed
+                memories = self.user_data.get("memories", [])
+                if not isinstance(memories, list):
+                    memories = []
+                
+                # Add missing 'image_path' to old entries
+                for memory in memories:
+                    if isinstance(memory, dict):
+                        memory.setdefault("image_path", "")
+                
+                self.user_data["memories"] = memories
+                self.memories = memories
+                
+                if password == self.user_data["password"]:
+                    self.current_user = username
+                    self.show_home()
+                else:
+                    messagebox.showerror("Error", "Incorrect password")
         else:
             messagebox.showerror("Error", "User not found")
-    
+
     def handle_register(self):
         """Handle new user registration"""
         username = self.username_entry.get()
@@ -215,20 +789,22 @@ class PicknicApp:
             messagebox.showerror("Error", "Please enter both username and password")
             return
         
-        if os.path.exists(f"users/user_{username}.json"):
+        if os.path.exists(f"user_{username}.json"):
             messagebox.showerror("Error", "Username already exists")
             return
         
         # Create new user
         self.user_data = {
             "username": username,
-            "password": password,  # In real app, hash this
+            "password": password,
             "memories": [],
             "profile_pic": "",
-            "achievements": []
+            "achievements": [],
+            "friends": [],
+            "friend_requests": []  # Add this line
         }
         
-        with open(f"users/user_{username}.json", "w") as f:
+        with open(f"user_{username}.json", "w") as f:
             json.dump(self.user_data, f)
         
         self.current_user = username
@@ -238,9 +814,10 @@ class PicknicApp:
         """Save user data to file"""
         if self.current_user:
             self.user_data["memories"] = self.memories
-            with open(f"users/user_{self.current_user}.json", "w") as f:
+            with open(f"user_{self.current_user}.json", "w") as f:
                 json.dump(self.user_data, f)
     
+
     def show_home(self):
         """Show the home screen"""
         if not self.current_user:
@@ -313,8 +890,11 @@ class PicknicApp:
             recent_frame.pack()
             
             # Show last 3 memories
-            for memory in self.memories[-3:]:
-                self.create_memory_letter(recent_frame, memory)
+            if self.memories and isinstance(self.memories, list):
+                for memory in self.memories[-3:]:
+                    self.create_memory_letter(recent_frame, memory)
+            else:
+                self.memories = []
     
     def show_hangout(self):
         """Show the hangout spot finder"""
@@ -375,6 +955,25 @@ class PicknicApp:
             command=self.browse_stamps
         )
         browse_btn.pack(pady=10)
+
+        tk.Label(
+            self.main_frame,
+            text="Plan with a friend:",
+            font=("Courier", 10),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=10)
+        
+        tk.Button(
+            self.main_frame,
+            text="👫 Joint Hangout Planner",
+            font=("Courier", 12),
+            bg=self.colors["primary"],
+            fg="white",
+            padx=20,
+            pady=5,
+            command=self.start_joint_quiz
+        ).pack(pady=10)
     
     def start_quiz(self):
         """Start the hangout spot quiz"""
@@ -702,11 +1301,17 @@ class PicknicApp:
             "notes": notes,
             "image_path": self.memory_image_path
         }
+        # Check for duplicates
+        if memory not in self.memories:
+            if isinstance(self.memories, list):
+                self.memories.append(memory)
+            else:
+                self.memories = [memory]
+            self.save_user_data()
+            messagebox.showinfo("Success", "Memory saved to your mail!")
+        else:
+            messagebox.showinfo("Info", "This memory already exists!")
         
-        self.memories.append(memory)
-        self.save_user_data()
-        
-        messagebox.showinfo("Success", "Memory saved to your mail!")
         self.show_mail()
     
     def show_mail(self):
@@ -760,6 +1365,9 @@ class PicknicApp:
     def create_memory_letter(self, parent, memory):
         """Create a letter-style memory widget"""
         # Main letter frame
+        if not isinstance(memory, dict):
+            return  # Skip invalid entries
+        
         letter_frame = tk.Frame(
             parent,
             bg="white",
@@ -770,13 +1378,27 @@ class PicknicApp:
         )
         letter_frame.pack(fill=tk.X, padx=20, pady=10)
         
+        image_path = memory.get("image_path", "")
+
+        # Rest of the function remains the same, using image_path variable
+        if image_path and os.path.exists(image_path):
+            try:
+                img = Image.open(image_path)
+                img.thumbnail((200, 200))
+                photo = ImageTk.PhotoImage(img)
+                
+                img_label = tk.Label(letter_frame, image=photo, bg="white")
+                img_label.image = photo  # Keep reference
+                img_label.pack(pady=10)
+            except Exception as e:
+                print(f"Error loading image: {e}")
+                
         # Stamp preview (top right)
         stamp_frame = tk.Frame(letter_frame, bg="white")
         stamp_frame.pack(anchor="ne")
         
         # Find the stamp data
-        stamp = next((s for s in self.stamps if s["id"] == memory["stamp_id"]), None)
-        
+        stamp = next((s for s in self.stamps if s["id"] == memory.get("stamp_id", "")), None)
         if stamp:
             tk.Label(
                 stamp_frame,
@@ -832,6 +1454,10 @@ class PicknicApp:
             self.show_login()
             return
         
+         # Reload fresh data
+        with open(f"user_{self.current_user}.json", "r") as f:
+            self.user_data = json.load(f)
+    
         self.clear_main_frame()
         
         # Title
@@ -893,13 +1519,98 @@ class PicknicApp:
         
         tk.Label(
             stats_frame,
-            text=f"Stamps Collected: {len(set(m['stamp_id'] for m in self.memories))}",
+            text=f"Stamps Collected: {len(set(m['stamp_id'] for m in self.memories if isinstance(m, dict)))}",
             font=("Courier", 12),
             bg=self.colors["background"],
             fg=self.colors["text"]
         ).pack(pady=5)
         
-        # Logout button
+        # Friend requests
+        tk.Label(
+            self.main_frame,
+            text="Friend Requests",
+            font=("Courier", 14, "underline"),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=10)
+
+        # Load current user's friend requests
+        with open(f"user_{self.current_user}.json", "r") as f:
+            current_user_data = json.load(f)
+            
+        requests = current_user_data.get("friend_requests", [])
+
+        if not requests:
+            tk.Label(
+                self.main_frame,
+                text="No pending friend requests",
+                font=("Courier", 10),
+                bg=self.colors["background"],
+                fg=self.colors["text"]
+            ).pack()
+        else:
+            req_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
+            req_frame.pack()
+            
+            for req in requests:
+                req_entry = tk.Frame(req_frame, bg="white", padx=10, pady=5)
+                req_entry.pack(fill=tk.X, pady=2)
+                
+                tk.Label(
+                    req_entry,
+                    text=req,
+                    font=("Courier", 12),
+                    bg="white"
+                ).pack(side=tk.LEFT)
+                
+                tk.Button(
+                    req_entry,
+                    text="Accept",
+                    font=("Courier", 8),
+                    bg=self.colors["accent"],
+                    fg="white",
+                    command=lambda r=req: self.handle_friend_request(r, True)
+                ).pack(side=tk.LEFT, padx=5)
+                
+                tk.Button(
+                    req_entry,
+                    text="Reject",
+                    font=("Courier", 8),
+                    bg=self.colors["secondary"],
+                    fg="white",
+                    command=lambda r=req: self.handle_friend_request(r, False)
+                ).pack(side=tk.LEFT)
+                # Logout button
+
+        tk.Label(
+            self.main_frame,
+            text="Friends",
+            font=("Courier", 14, "underline"),
+            bg=self.colors["background"],
+            fg=self.colors["text"]
+        ).pack(pady=10)
+
+        friends = self.user_data.get("friends", [])
+        if not friends:
+            tk.Label(
+                self.main_frame,
+                text="No friends yet",
+                font=("Courier", 10),
+                bg=self.colors["background"],
+                fg=self.colors["text"]
+            ).pack()
+        else:
+            friends_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
+            friends_frame.pack()
+            for friend in friends:
+                tk.Label(
+                    friends_frame,
+                    text=f"• {friend}",
+                    font=("Courier", 12),
+                    bg=self.colors["background"],
+                    fg=self.colors["text"]
+                ).pack(anchor="w")
+                
         tk.Button(
             self.main_frame,
             text="Logout",
@@ -1234,3 +1945,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PicknicApp(root)
     root.mainloop()
+
