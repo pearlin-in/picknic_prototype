@@ -25,6 +25,7 @@ class PicknicApp:
         self.load_sample_stamps()
 
         # UI colors
+        '''
         self.colors = {
             "primary": "#FF9AA2",  # Pink
             "secondary": "#FFB7B2",  # Light pink
@@ -34,7 +35,7 @@ class PicknicApp:
             "highlight": "#E2F0CB",  # Mint
             "stamp_border": "#5A3921"  # Dark brown for stamp edges
         }
-
+        
         # Create navigation frame
         self.nav_frame = tk.Frame(root, bg=self.colors["primary"], height=60)
         self.nav_frame.pack(side=tk.TOP, fill=tk.X)
