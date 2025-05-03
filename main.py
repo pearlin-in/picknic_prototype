@@ -192,8 +192,8 @@ class PicknicApp:
             return
         
         # Check if user exists
-        if os.path.exists(f"user_{username}.json"):
-            with open(f"user_{username}.json", "r") as f:
+        if os.path.exists(f"users/user_{username}.json"):
+            with open(f"users/user_{username}.json", "r") as f:
                 self.user_data = json.load(f)
             
             # In a real app, verify password hash
@@ -215,7 +215,7 @@ class PicknicApp:
             messagebox.showerror("Error", "Please enter both username and password")
             return
         
-        if os.path.exists(f"user_{username}.json"):
+        if os.path.exists(f"users/user_{username}.json"):
             messagebox.showerror("Error", "Username already exists")
             return
         
@@ -228,7 +228,7 @@ class PicknicApp:
             "achievements": []
         }
         
-        with open(f"user_{username}.json", "w") as f:
+        with open(f"users/user_{username}.json", "w") as f:
             json.dump(self.user_data, f)
         
         self.current_user = username
@@ -238,7 +238,7 @@ class PicknicApp:
         """Save user data to file"""
         if self.current_user:
             self.user_data["memories"] = self.memories
-            with open(f"user_{self.current_user}.json", "w") as f:
+            with open(f"users/user_{self.current_user}.json", "w") as f:
                 json.dump(self.user_data, f)
     
     def show_home(self):
