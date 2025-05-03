@@ -1366,8 +1366,9 @@ class PicknicApp:
         """Create a letter-style memory widget"""
         # Main letter frame
         if not isinstance(memory, dict):
-            return  # Skip invalid entries
-        
+            return
+
+        # Main frame
         letter_frame = tk.Frame(
             parent,
             bg="white",
@@ -1377,77 +1378,64 @@ class PicknicApp:
             highlightthickness=1
         )
         letter_frame.pack(fill=tk.X, padx=20, pady=10)
-        
-        image_path = memory.get("image_path", "")
 
-        # Rest of the function remains the same, using image_path variable
+        # --- Image Section (Top) ---
+        image_path = memory.get("image_path", "")
         if image_path and os.path.exists(image_path):
             try:
                 img = Image.open(image_path)
-                img.thumbnail((200, 200))
+                img.thumbnail((200, 200))  # Resize for consistency
                 photo = ImageTk.PhotoImage(img)
                 
                 img_label = tk.Label(letter_frame, image=photo, bg="white")
-                img_label.image = photo  # Keep reference
-                img_label.pack(pady=10)
+                img_label.image = photo  # Retain reference
+                img_label.pack(pady=10)  # Position image at the top
             except Exception as e:
-                print(f"Error loading image: {e}")
-                
-        # Stamp preview (top right)
-        stamp_frame = tk.Frame(letter_frame, bg="white")
-        stamp_frame.pack(anchor="ne")
+                print(f"Image load error: {e}")
+        elif image_path:  # Path exists but image not found
+            print(f"Warning: Image not found at {image_path}")
+
+        # --- Title & Location ---
+        title_frame = tk.Frame(letter_frame, bg="white")
+        title_frame.pack(fill=tk.X, pady=5)
         
-        # Find the stamp data
-        stamp = next((s for s in self.stamps if s["id"] == memory.get("stamp_id", "")), None)
-        if stamp:
-            tk.Label(
-                stamp_frame,
-                text=stamp["title"],
-                font=("Courier", 10, "bold"),
-                bg="white"
-            ).pack(anchor="e")
-            
-            tk.Label(
-                stamp_frame,
-                text=f"📍 {stamp['location']}",
-                font=("Courier", 8),
-                bg="white"
-            ).pack(anchor="e")
+        tk.Label(
+            title_frame,
+            text=f"✉️ {memory.get('stamp_title', 'Unnamed Memory')}",
+            font=("Courier", 12, "bold"),
+            bg="white"
+        ).pack(side=tk.LEFT)
+
         
-        # Date
         tk.Label(
             letter_frame,
-            text=f"📅 {memory['date']}",
+            text=f"📅 {memory.get('date', 'No Date')}",
             font=("Courier", 9),
             bg="white"
         ).pack(anchor="w", pady=5)
-        
-        # Image if available
-        if memory["image_path"] and os.path.exists(memory["image_path"]):
-            try:
-                img = Image.open(memory["image_path"])
-                img.thumbnail((200, 200))
-                photo = ImageTk.PhotoImage(img)
+
+        # --- Notes ---
+        notes = memory.get("notes", "")
+        if notes.strip():
+            tk.Label(
+                letter_frame,
+                text=notes,
+                font=("Courier", 10),
+                bg="white",
+                wraplength=600,
+                justify="left"
+            ).pack(anchor="w", pady=10)
+
+        # --- Joint Plan Badge (if applicable) ---
+        if memory.get("type") == "joint":
+            tk.Label(
+                letter_frame,
+                text=f"👫 Joint Plan with {memory.get('friend', 'Unknown')}",
+                font=("Courier", 10, "italic"),
+                bg=self.colors["highlight"],
+                fg=self.colors["text"]
+            ).pack(anchor="w", fill=tk.X, pady=5)
                 
-                img_label = tk.Label(letter_frame, image=photo, bg="white")
-                img_label.image = photo  # Keep reference
-                img_label.pack(pady=10)
-            except Exception as e:
-                print(f"Error loading image: {e}")
-        
-        # Notes
-        notes_frame = tk.Frame(letter_frame, bg="white")
-        notes_frame.pack(fill=tk.X, pady=10)
-        
-        tk.Label(
-            notes_frame,
-            text=memory["notes"],
-            font=("Courier", 10),
-            bg="white",
-            wraplength=600,
-            justify="left"
-        ).pack(anchor="w")
-    
     def show_profile(self):
         """Show user profile"""
         if not self.current_user:
