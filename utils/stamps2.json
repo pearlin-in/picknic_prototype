@@ -1,0 +1,122 @@
+stamps = [
+  {
+      "id": "ST-001",
+      "title": "Sunset Beach Picnic",
+      "description": "Enjoy a romantic picnic as the sun sets over the water",
+      "location": "Corniche Beach",
+      "budget": "AED 50-100",
+      "duration": "2-3 hours",
+      "category": "Romantic",
+      "tags": ["outdoor", "couples", "evening"],
+      "url": "https://g.co/kgs/1sy6Mpv",
+      "image_path": "../picknic/assets/images/corniche.jpg"
+  },
+  {
+      "id": "ST-002",
+      "title": "Art Cafe Hangout",
+      "description": "Creative space with coffee, art exhibits, and board games",
+      "location": "Al Bateen",
+      "budget": "AED 30-80",
+      "duration": "1-2 hours",
+      "category": "Creative",
+      "tags": ["indoor", "friends", "daytime"],
+      "url": "https://g.co/kgs/qD3MNXi",
+      "image_path": "../picknic/assets/images/artHouseCafe.jpg"
+  },
+  {
+      "id": "ST-003",
+      "title": "Desert Stargazing",
+      "description": "Evening desert trip with telescope and traditional dinner",
+      "location": "Liwa Desert",
+      "budget": "AED 150-300",
+      "duration": "4-5 hours",
+      "category": "Adventure",
+      "tags": ["outdoor", "group", "evening"],
+      "url": "https://g.co/kgs/S13Swcy",
+      "image_path": "../picknic/assets/images/desertStar.jpg"
+  },
+  {
+      "id": "ST-004",
+      "title": "Vintage Arcade",
+      "description": "Retro arcade with classic games and milkshakes",
+      "location": "Yas Island",
+      "budget": "AED 60-120",
+      "duration": "1-3 hours",
+      "category": "Fun",
+      "tags": ["indoor", "friends", "anytime"],
+      "url": "https://g.co/kgs/Ky4vJE3",
+      "image_path": "../picknic/assets/images/vintageArcade.jpg"
+  },
+  {
+      "id": "ST-005",
+      "title": "Bookstore Cafe",
+      "description": "Cozy bookstore with reading nooks and great coffee",
+      "location": "Al Reem Island",
+      "budget": "AED 20-60",
+      "duration": "1-2 hours",
+      "category": "Quiet",
+      "tags": ["indoor", "solo", "daytime"],
+      "url": "https://g.co/kgs/1LPHzeV",
+      "image_path": "../picknic/assets/images/bookstoreCafe.jpg"
+  },
+  {
+      "id": "ST-006",
+      "title": "Kayaking Adventure",
+      "description": "Explore mangroves by kayak with guided tour",
+      "location": "Eastern Mangroves",
+      "budget": "AED 100-200",
+      "duration": "2-3 hours",
+      "category": "Active",
+      "tags": ["outdoor", "group", "daytime"],
+      "url": "https://g.co/kgs/8pGmG8i",
+      "image_path": "../picknic/assets/images/mangrove.jpg"
+  },
+  {
+      "id": "ST-007",
+      "title": "Rooftop Lounge",
+      "description": "Chic rooftop with city views and cocktails",
+      "location": "Downtown Abu Dhabi",
+      "budget": "AED 80-200",
+      "duration": "2-4 hours",
+      "category": "Luxury",
+      "tags": ["outdoor", "couples", "evening"],
+      "url": "https://g.co/kgs/j6UD71p",
+      "image_path": "../picknic/assets/images/rooftop.jpg"
+  },
+  {
+      "id": "ST-008",
+      "title": "DIY Pottery Studio",
+      "description": "Create your own pottery with expert guidance",
+      "location": "Al Khalidiyah",
+      "budget": "AED 70-150",
+      "duration": "1-2 hours",
+      "category": "Creative",
+      "tags": ["indoor", "friends", "daytime"],
+      "url": "https://g.co/kgs/kVXCuQY",
+      "image_path": "../picknic/assets/images/pottery.jpg"
+  },
+  {
+      "id": "ST-009",
+      "title": "Secret Garden Cafe",
+      "description": "Hidden garden cafe with homemade treats",
+      "location": "Al Nahyan",
+      "budget": "AED 40-90",
+      "duration": "1-2 hours",
+      "category": "Chill",
+      "tags": ["outdoor", "any", "daytime"],
+      "url": "https://g.co/kgs/swwiqSv",
+      "image_path": "../picknic/assets/images/gardenCafe.jpg"
+  },
+  {
+      "id": "ST-010",
+      "title": "Night Market",
+      "description": "Evening market with local crafts and street food",
+      "location": "Hazza Bin Zayed Stadium",
+      "budget": "AED 30-100",
+      "duration": "1-3 hours",
+      "category": "Cultural",
+      "tags": ["outdoor", "group", "evening"],
+      "url": "https://g.co/kgs/WAc5w3S",
+      "image_path": "../picknic/assets/images/nightMarket.jpg"
+  }
+  ]
