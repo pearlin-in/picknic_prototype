@@ -9,6 +9,7 @@ import webbrowser
 from io import BytesIO
 import requests
 
+
 class PicknicApp:
     def __init__(self, root):
         self.root = root
@@ -20,6 +21,7 @@ class PicknicApp:
         self.current_user = None
         self.user_data = {}
         self.stamps = []
+        self.all_stamps = []
         self.memories = []
         self.load_sample_stamps()
 
@@ -847,7 +849,7 @@ class PicknicApp:
             self.main_frame, bg=self.colors["background"])
         self.profile_pic_frame.pack(pady=20)
 
-        # Load profile pic if exists
+        # Loads profile pic if exists
         profile_pic_path = self.user_data.get("profile_pic", "")
 
         if profile_pic_path and os.path.exists(profile_pic_path):
@@ -869,7 +871,7 @@ class PicknicApp:
         else:
             self.show_default_profile_pic()
 
-        # Upload button
+        # Uploads button
         tk.Button(
             self.profile_pic_frame,
             text="Upload Profile Picture",
@@ -913,7 +915,7 @@ class PicknicApp:
 
     def show_default_profile_pic(self):
         """Show default profile picture"""
-        # Create a simple colored circle as default pic
+        # Creates a simple colored circle as default pic
         self.profile_pic_label = tk.Label(
             self.profile_pic_frame,
             text=self.current_user[0].upper(),  # First initial
@@ -954,18 +956,18 @@ class PicknicApp:
 
     def create_stamp_image(self, stamp_data, size=(200, 150)):
         """Create a postage stamp image with decorative border"""
-        # Create blank image
+        # Creates blank image
         stamp = Image.new("RGB", size, "#FFF5EB")
         draw = ImageDraw.Draw(stamp)
 
-        # Draw decorative border (scalloped edges)
+        # Draws decorative border (scalloped edges)
         border_color = self.colors["stamp_border"]
 
-        # Draw the main rectangle
+        # Draws the main rectangle
         draw.rectangle([5, 5, size[0]-5, size[1]-5],
                        outline=border_color, width=2)
 
-        # Draw scalloped edges
+        # Draws scalloped edges
         radius = 8
         for x in range(10, size[0]-10, radius*2):
             # Top edge
@@ -1066,6 +1068,23 @@ class PicknicApp:
 
         return frame
 
+    def search_filter_stamps(self, query):
+        query = query.lower().strip()
+        if not query:
+            filtered = list(self.all_stamps)  # Show all if query is empty
+        else:
+            filtered = []
+            for stamp in self.all_stamps:
+                text = " ".join([
+                    stamp.get("title", ""),
+                    stamp.get("location", ""),
+                    " ".join(stamp.get("tags", []))
+                ]).lower()
+                if query in text:
+                    filtered.append(stamp)
+
+        self.show_stamps(filtered)
+
     def browse_stamps(self):
         """Browse all available stamps with beautiful layout"""
         self.clear_main_frame()
@@ -1087,12 +1106,28 @@ class PicknicApp:
             bg=self.colors["background"],
             fg=self.colors["text"]
         ).pack(pady=5)
+        # Search bar
+        filter_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
+        filter_frame.pack(pady=10)
 
-        # Create stamp gallery
+        tk.Label(filter_frame, text="Search:", font=("Courier", 10),
+                 bg=self.colors["background"], fg=self.colors["text"]).pack(side=tk.LEFT)
+
+        self.search_entry = tk.Entry(filter_frame)
+        self.search_entry.pack(side=tk.LEFT, padx=5)
+
+        search_button = tk.Button(
+            filter_frame,
+            text="Go",
+            command=lambda: self.search_filter_stamps(self.search_entry.get())
+        )
+        search_button.pack(side=tk.LEFT, padx=5)
+
+        # Creates stamp gallery
         gallery_frame = tk.Frame(self.main_frame, bg=self.colors["background"])
         gallery_frame.pack(pady=20, fill=tk.BOTH, expand=True)
 
-        # Create a canvas for scrolling
+        # Creates a canvas for scrolling
         canvas = tk.Canvas(
             gallery_frame, bg=self.colors["background"], highlightthickness=0)
         scrollbar = ttk.Scrollbar(
@@ -1109,32 +1144,45 @@ class PicknicApp:
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-        # Display stamps in a grid
-        for i, stamp in enumerate(self.stamps):
-            row = i // 3
-            col = i % 3
+        # Replace grid display with dynamic gallery call
+        self.stamps_container = stamps_container  # Store for later refresh
+        self.show_stamps(self.stamps)
 
-            stamp_frame = self.create_stamp_widget(stamps_container, stamp)
-            stamp_frame.grid(row=row, column=col, padx=15, pady=15)
+    def show_stamps(self, stamps_to_display=None):
+        if stamps_to_display is None:
+            stamps_to_display = self.stamps
 
-            self.add_hover_effect(
-                stamp_frame, highlight_color="#FFFFFF", default_color=self.colors["background"])
-            # Add click event to select stamp
-            stamp_frame.bind("<Button-1>", lambda e,
-                             s=stamp: self.select_stamp(s))
-            for child in stamp_frame.winfo_children():
-                child.bind("<Button-1>", lambda e,
-                           s=stamp: self.select_stamp(s))
+        # Clears old widgets
+        for widget in self.stamps_container.winfo_children():
+            widget.destroy()
 
         # If no stamps found (shouldn't happen but just in case)
         if not self.stamps:
             tk.Label(
-                stamps_container,
+                self.stamps_container,
                 text="No stamps available at the moment",
                 font=("Courier", 12),
                 bg=self.colors["background"],
                 fg=self.colors["text"]
             ).pack(pady=50)
+
+        # Displas stamps in a grid
+        for i, stamp in enumerate(stamps_to_display):
+            row = i // 3
+            col = i % 3
+
+            stamp_frame = self.create_stamp_widget(
+                self.stamps_container, stamp)
+            stamp_frame.grid(row=row, column=col, padx=15, pady=15)
+
+            self.add_hover_effect(
+                stamp_frame, highlight_color="#FFFFFF", default_color=self.colors["background"])
+            # Adds click event to select stamp
+            stamp_frame.bind("<Button-1>", lambda e,
+                             s=stamp: self.select_stamp(s))
+            for child in stamp_frame.winfo_children():
+                child.bind("<Button-1>", lambda e,
+                           s=stamp: self.select_stamp(s))
 
     def add_hover_effect(self, widget, highlight_color="#FFFFFF", default_color=None):
         """Adds hover effect to a widget"""
@@ -1165,7 +1213,7 @@ class PicknicApp:
 
     def load_sample_stamps(self):
         """Load sample stamp data"""
-        self.stamps = [
+        self.all_stamps = [
             {
                 "id": "ST-001",
                 "title": "Sunset Beach Picnic",
@@ -1176,7 +1224,7 @@ class PicknicApp:
                 "category": "Romantic",
                 "tags": ["outdoor", "couples", "evening"],
                 "url": "https://g.co/kgs/1sy6Mpv",
-                "image_path": "../picknic/picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/corniche.jpg"
             },
             {
                 "id": "ST-002",
@@ -1188,7 +1236,7 @@ class PicknicApp:
                 "category": "Creative",
                 "tags": ["indoor", "friends", "daytime"],
                 "url": "https://g.co/kgs/qD3MNXi",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/artHouseCafe.jpg"
             },
             {
                 "id": "ST-003",
@@ -1200,7 +1248,7 @@ class PicknicApp:
                 "category": "Adventure",
                 "tags": ["outdoor", "group", "evening"],
                 "url": "https://g.co/kgs/S13Swcy",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/desertStar.jpg"
             },
             {
                 "id": "ST-004",
@@ -1212,7 +1260,7 @@ class PicknicApp:
                 "category": "Fun",
                 "tags": ["indoor", "friends", "anytime"],
                 "url": "https://g.co/kgs/Ky4vJE3",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/vintageArcade.jpg"
             },
             {
                 "id": "ST-005",
@@ -1224,7 +1272,7 @@ class PicknicApp:
                 "category": "Quiet",
                 "tags": ["indoor", "solo", "daytime"],
                 "url": "https://g.co/kgs/1LPHzeV",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/bookstoreCafe.jpg"
             },
             {
                 "id": "ST-006",
@@ -1236,7 +1284,7 @@ class PicknicApp:
                 "category": "Active",
                 "tags": ["outdoor", "group", "daytime"],
                 "url": "https://g.co/kgs/8pGmG8i",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/mangrove.jpg"
             },
             {
                 "id": "ST-007",
@@ -1248,7 +1296,7 @@ class PicknicApp:
                 "category": "Luxury",
                 "tags": ["outdoor", "couples", "evening"],
                 "url": "https://g.co/kgs/j6UD71p",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/rooftop.jpg"
             },
             {
                 "id": "ST-008",
@@ -1260,7 +1308,7 @@ class PicknicApp:
                 "category": "Creative",
                 "tags": ["indoor", "friends", "daytime"],
                 "url": "https://g.co/kgs/kVXCuQY",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/pottery.jpg"
             },
             {
                 "id": "ST-009",
@@ -1272,7 +1320,7 @@ class PicknicApp:
                 "category": "Chill",
                 "tags": ["outdoor", "any", "daytime"],
                 "url": "https://g.co/kgs/swwiqSv",
-                "image_path": "../picknic/assets/images/corniche.jpg"
+                "image_path": "../picknic/assets/images/gardenCafe.jpg"
             },
             {
                 "id": "ST-010",
@@ -1284,8 +1332,10 @@ class PicknicApp:
                 "category": "Cultural",
                 "tags": ["outdoor", "group", "evening"],
                 "url": "https://g.co/kgs/WAc5w3S",
+                "image_path": "../picknic/assets/images/nightMarket.jpg"
             }
         ]
+        self.stamps = list(self.all_stamps)
 
 
 if __name__ == "__main__":
