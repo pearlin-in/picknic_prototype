@@ -1,11 +1,12 @@
 # placeholder for reusable UI widgets (like tamp cards or memory previews)
 import tkinter as tk
-from ui.home_screen import HomeScreen
-from ui.hangout_screen import HangoutScreen
-from ui.memory_screen import MemoryScreen
-from ui.profile_screen import ProfileScreen
 
 def create_navbar(state, parent):
+    from ui.home_screen import HomeScreen
+    from ui.hangout_screen import HangoutScreen
+    from ui.memory_screen import MemoryScreen
+    from ui.profile_screen import ProfileScreen
+
     colors = state.colors
     nav_frame = tk.Frame(parent, bg=colors["primary"], height=60)
     nav_frame.pack(side=tk.TOP, fill=tk.X)

@@ -10,7 +10,6 @@ class HangoutScreen:
         self.root = state.root
         self.current_question = 0
         self.answers = []
-
         self.questions = [
             ("What's your mood today?", ["😌 Chill", "🎉 Fun", "🧠 Intellectual", "🏄 Adventure"]),
             ("Who's coming with you?", ["Just me/+1", "Small group", "Big group"]),
@@ -19,8 +18,8 @@ class HangoutScreen:
 
     def show(self):
         self.clear()
-        self.show_question()
         create_navbar(self.state, self.root)
+        self.show_question()
 
     def clear(self):
         for widget in self.root.winfo_children():
@@ -28,6 +27,7 @@ class HangoutScreen:
 
     def show_question(self):
         self.clear()
+        create_navbar(self.state, self.root)
         bg = self.state.colors["background"]
         text = self.state.colors["text"]
         accent = self.state.colors["accent"]
@@ -51,6 +51,7 @@ class HangoutScreen:
 
     def show_results(self):
         self.clear()
+        create_navbar(self.state, self.root)
         bg = self.state.colors["background"]
         text = self.state.colors["text"]
 

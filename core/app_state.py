@@ -10,13 +10,13 @@ class AppState:
         self.user_data = {}
         self.memories = []
         self.colors = {
-            "primary": "#FF9AA2",
-            "secondary": "#FFB7B2",
-            "accent": "#FFDAC1",
-            "background": "#FFF5EB",
-            "text": "#5A3921",
-            "highlight": "#E2F0CB",
-            "stamp_border": "#5A3921"
+        "primary": "#3A6EA5",
+        "secondary": "#739FD6",
+        "accent": "#F5EBDD",
+        "background": "#FFF5EB",
+        "text": "#2E2E2E",
+        "highlight": "#D1E8E2",
+        "stamp_border": "#2E2E2E"
         }
         self.stamps = []
         self.current_stamp = None
