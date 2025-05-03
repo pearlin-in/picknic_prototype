@@ -201,7 +201,7 @@ class PicknicApp:
                     text="Send Friend Request",
                     font=("Courier", 10),
                     bg=self.colors["accent"],
-                    fg="white",
+                    fg=self.colors["text"],
                    command=lambda u=user_data["username"]: self.send_friend_request(u))
                 request_btn.pack()
 
