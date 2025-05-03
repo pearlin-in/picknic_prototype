@@ -1,4 +1,4 @@
-stamps = [
+[
   {
       "id": "ST-001",
       "title": "Sunset Beach Picnic",
@@ -119,4 +119,4 @@ stamps = [
       "url": "https://g.co/kgs/WAc5w3S",
       "image_path": "../picknic/assets/images/nightMarket.jpg"
   }
-  ]
+]
